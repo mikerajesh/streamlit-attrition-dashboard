@@ -1,5 +1,8 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
+import joblib
+import os
 
 st.title("Employee Attrition Dashboard")
 
@@ -97,11 +100,6 @@ st.subheader("Filtered Employee Records")
 
 st.dataframe(df)
 
-import streamlit as st
-import pandas as pd
-import joblib
-import numpy as np
-
 # =========================
 # PAGE CONFIG
 # =========================
@@ -119,17 +117,22 @@ def load_data():
 df = load_data()
 
 # =========================
-# LOAD MODEL ARTIFACTS (ONCE)
+# SAFE MODEL LOADING (IMPORTANT FIX)
 # =========================
-selected_features = joblib.load("dashboard/models/selected_features.pkl")
-scaler = joblib.load("dashboard/models/scaler.pkl")
-model = joblib.load("dashboard/models/improved_model.pkl")
+BASE_DIR = os.path.dirname(__file__)
 
-feature_list = selected_features.tolist() if hasattr(selected_features, "tolist") else list(selected_features)
+model = joblib.load(os.path.join(BASE_DIR, "models/improved_model.pkl"))
+scaler = joblib.load(os.path.join(BASE_DIR, "models/scaler.pkl"))
+selected_features = joblib.load(os.path.join(BASE_DIR, "models/selected_features.pkl"))
+
+feature_list = (
+    selected_features.tolist()
+    if hasattr(selected_features, "tolist")
+    else list(selected_features)
+)
 
 if "Attrition" in feature_list:
     feature_list.remove("Attrition")
-
 
 # =========================
 # ENCODING FUNCTION
@@ -144,7 +147,6 @@ def encode_input(input_df):
             df_encoded[col] = df_encoded[col].astype("category").cat.codes
 
     return df_encoded
-
 
 # =========================
 # SIDEBAR FILTERS
@@ -167,7 +169,6 @@ job_role = st.sidebar.selectbox(
 if job_role != "All":
     df = df[df["JobRole"] == job_role]
 
-
 # =========================
 # VISUALIZATIONS
 # =========================
@@ -180,24 +181,18 @@ st.bar_chart(pd.crosstab(df["OverTime"], df["Attrition"]))
 st.subheader("🙂 Job Satisfaction Distribution")
 st.bar_chart(df["JobSatisfaction"].value_counts().sort_index())
 
-
 # =========================
 # METRIC
 # =========================
 attrition_rate = (df["Attrition"] == "Yes").mean() * 100
-
 st.metric("Attrition Rate", f"{attrition_rate:.2f}%")
 
-
 # =========================
-# =========================
-# 🤖 PREDICTION SECTION
-# =========================
+# PREDICTION SECTION
 # =========================
 st.markdown("---")
 st.subheader("🤖 Predict Employee Attrition Risk")
-
-st.write("Fill employee details to predict likelihood of leaving.")
+st.write("Fill employee details below to predict likelihood of leaving.")
 
 input_data = {}
 
@@ -228,7 +223,6 @@ for i, col in enumerate(feature_list):
                 float(df[col].mean())
             )
 
-
 # =========================
 # PREDICTION BUTTON
 # =========================
@@ -236,10 +230,10 @@ if st.button("Run Attrition Prediction"):
 
     input_df = pd.DataFrame([input_data])
 
-    # ensure correct column order
+    # ensure correct order
     input_df = input_df[feature_list]
 
-    # encode categorical columns
+    # encode categorical columns safely
     input_encoded = encode_input(input_df)
 
     # scale input
@@ -256,7 +250,6 @@ if st.button("Run Attrition Prediction"):
         st.error(f"⚠️ High Risk: Employee likely to leave ({probability:.1f}% probability)")
     else:
         st.success(f"✅ Low Risk: Employee likely to stay ({probability:.1f}% probability)")
-
 
 # =========================
 # DATA VIEW
