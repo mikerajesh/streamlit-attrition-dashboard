@@ -98,7 +98,7 @@ st.subheader("Filtered Employee Records")
 st.dataframe(df)
 
 st.subheader("Predict Employee Resignation Risk")
-    st.write("Fill in the employee details below to predict their probability of leaving.")
+st.write("Fill in the employee details below to predict their probability of leaving.")
 
     try:
         # File paths updated to include 'dashboard/models/' based on your GitHub link
