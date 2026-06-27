@@ -96,3 +96,32 @@ st.metric(
 st.subheader("Filtered Employee Records")
 
 st.dataframe(df)
+
+# =========================
+# Monitoring Metrics (Q5)
+# =========================
+
+st.subheader("Monitoring Metrics")
+
+col1, col2 = st.columns(2)
+
+# Business Metric
+with col1:
+    st.metric(
+        "Attrition Rate",
+        f"{attrition_rate:.2f}%"
+    )
+
+# Data Quality Metric
+missing_values = df.isnull().sum().sum()
+
+with col2:
+    st.metric(
+        "Missing Values",
+        int(missing_values)
+    )
+
+st.caption(
+    "These monitoring metrics help HR monitor employee turnover and dataset quality after dashboard deployment."
+)
+
