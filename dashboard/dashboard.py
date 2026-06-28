@@ -125,3 +125,39 @@ st.caption(
     "These monitoring metrics help HR monitor employee turnover and dataset quality after dashboard deployment."
 )
 
+# =========================
+# Simple Data Drift Analysis
+# =========================
+
+st.subheader("Simple Data Drift Analysis")
+
+original_df = load_data()
+
+overall_income = original_df["MonthlyIncome"].mean()
+filtered_income = df["MonthlyIncome"].mean()
+
+difference = abs(overall_income - filtered_income)
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.metric(
+        "Overall Mean Income",
+        f"${overall_income:,.0f}"
+    )
+
+with col2:
+    st.metric(
+        "Filtered Mean Income",
+        f"${filtered_income:,.0f}"
+    )
+
+with col3:
+    st.metric(
+        "Difference",
+        f"${difference:,.0f}"
+    )
+
+st.caption(
+    "A large difference between the original dataset and filtered data may indicate data drift."
+)
